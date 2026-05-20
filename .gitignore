@@ -1,7 +1,11 @@
-﻿# Binaries
+﻿# Binaries (root only, not bin/)
 *.exe
 *.test
 *.out
+
+# Allow platform binaries in bin/
+!bin/
+!bin/*.exe
 
 # Backup files
 *.bak
