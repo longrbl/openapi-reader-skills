@@ -19,12 +19,30 @@
 
 ## 安装
 
-从 Releases 下载最新的 `openapi.exe`，或从源码构建：
+从 Releases 下载对应平台的二进制，或从源码构建：
 
 ```bash
 cd go
-go build -o openapi.exe .
+go build -o openapi .    # 当前平台
 ```
+
+或指定平台：
+
+```bash
+cd go
+GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o openapi-linux-amd64 .
+GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 go build -o openapi-darwin-arm64 .
+```
+
+所有预编译二进制见 `bin/` 目录：
+
+| 操作系统 | 架构 | 二进制 |
+|----------|------|--------|
+| Windows | amd64 | `bin/openapi-windows-amd64.exe` |
+| Linux | amd64 | `bin/openapi-linux-amd64` |
+| Linux | arm64 | `bin/openapi-linux-arm64` |
+| macOS (Intel) | amd64 | `bin/openapi-darwin-amd64` |
+| macOS (Apple Silicon) | arm64 | `bin/openapi-darwin-arm64` |
 
 ## 用法
 
