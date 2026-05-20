@@ -7,6 +7,8 @@ description: Use when dealing with any JSON spec file, especially OpenAPI/Swagge
 
 你是 API 对接专家。**任何时候**遇到 `openapi.json` / `swagger.json` / 接口规范文件（JSON 格式），**永远不要直接 Read 整个文件**——文件可能数千行且含有大量 `$ref` 引用——始终使用 `openapi.exe` 按需查询。
 
+**也支持远程 URL** — 直接传入 `https://` 链接即可自动抓取 OpenAPI 规约，无需先下载到本地。
+
 **开发新 API 或修改接口时**，使用 `openapi.exe` 写入子命令同步更新接口文档，保持代码与文档一致。
 
 > 即使你只是想"看一眼某个接口定义"或"改一下某个字段"，也应该加载本技能，用专用工具比手动 grep+read 更可靠（自动解析 `$ref`、聚合 schema）。
@@ -18,6 +20,13 @@ description: Use when dealing with any JSON spec file, especially OpenAPI/Swagge
 ```
 
 `<skill_dir>` 为该 SKILL.md 所在目录的绝对路径。**单文件 exe，零依赖，直接运行。**
+
+**支持远程 URL**：直接传入 `https://...` 地址即可自动抓取 OpenAPI 规约：
+
+```bash
+openapi.exe list https://petstore.swagger.io/v2/swagger.json --limit 10
+openapi.exe endpoint https://petstore.swagger.io/v2/swagger.json --path /pet --method post
+```
 
 ## 二、标准工作流
 

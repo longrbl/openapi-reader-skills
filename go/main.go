@@ -437,6 +437,10 @@ func cmdUsesField(specFile string, args []string) {
 // ── Write commands ─────────────────────────────────────────────────
 
 func cmdUpsertEndpoint(specFile string, args []string) {
+	if isURL(specFile) {
+		fmt.Fprintln(os.Stderr, "error: write commands require a local file, not a URL")
+		os.Exit(exitCodeUsage)
+	}
 	fs := flag.NewFlagSet("upsert-endpoint", flag.ExitOnError)
 	path := fs.String("path", "", "API path")
 	method := fs.String("method", "", "HTTP method")
@@ -540,6 +544,10 @@ func cmdUpsertEndpoint(specFile string, args []string) {
 }
 
 func cmdRemoveEndpoint(specFile string, args []string) {
+	if isURL(specFile) {
+		fmt.Fprintln(os.Stderr, "error: write commands require a local file, not a URL")
+		os.Exit(exitCodeUsage)
+	}
 	fs := flag.NewFlagSet("remove-endpoint", flag.ExitOnError)
 	path := fs.String("path", "", "API path")
 	method := fs.String("method", "", "HTTP method (omit to remove entire path)")
@@ -566,6 +574,10 @@ func cmdRemoveEndpoint(specFile string, args []string) {
 }
 
 func cmdUpsertSchema(specFile string, args []string) {
+	if isURL(specFile) {
+		fmt.Fprintln(os.Stderr, "error: write commands require a local file, not a URL")
+		os.Exit(exitCodeUsage)
+	}
 	fs := flag.NewFlagSet("upsert-schema", flag.ExitOnError)
 	name := fs.String("name", "", "Schema name")
 	schemaFile := fs.String("file", "", "JSON file with schema definition")
@@ -632,6 +644,10 @@ func mustLoad(path string) *OpenAPI {
 }
 
 func mustLoadForWrite(path string) *OpenAPI {
+	if isURL(path) {
+		fmt.Fprintln(os.Stderr, "error: write commands require a local file, not a URL")
+		os.Exit(exitCodeUsage)
+	}
 	api, err := LoadSpec(path)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error loading spec: %v\n", err)

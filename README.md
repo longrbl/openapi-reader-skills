@@ -13,6 +13,7 @@
 - **输出控制** — `--limit`、`--compact`、`--depth` 防止 AI 上下文溢出
 - **JSON 输出** — `--output json` 供机器解析
 - **跨平台** — Windows、Linux、macOS；处理 MSYS2 路径、BOM、UTF-8、中文编码
+- **远程 URL 支持** — 直接传入 `https://` 链接自动抓取，无需手动下载
 - **安全写入** — 自动 `.bak` 备份、跨设备 Rename 回退
 - **质量校验** — `[!]` 阻断级 / `[~]` 建议级警告
 
@@ -51,6 +52,9 @@ openapi help <command>
 ```bash
 # 列出所有接口（限制 20 条防溢出）
 openapi list api.json --limit 20
+
+# 从远程 URL 读取规格
+openapi list https://petstore.swagger.io/v2/swagger.json --limit 5
 
 # 获取接口详情，限制 Schema 展开深度
 openapi endpoint api.json --path /users --method post --depth 2

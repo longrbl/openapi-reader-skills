@@ -3,10 +3,13 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
 	"runtime"
 	"sort"
 	"strings"
+	"time"
 	"unicode/utf8"
 )
 
@@ -75,20 +78,66 @@ var httpMethods = []string{"get", "post", "put", "patch", "delete", "options", "
 
 // ── Loading ────────────────────────────────────────────────────────
 
-func LoadSpec(filepathArg string) (*OpenAPI, error) {
-	fp := fixMSYS2SpecPath(filepathArg)
+func LoadSpec(specArg string) (*OpenAPI, error) {
+	// Remote URL
+	if isURL(specArg) {
+		return loadFromURL(specArg)
+	}
 
+	fp := fixMSYS2SpecPath(specArg)
 	content, err := readFileAuto(fp)
 	if err != nil {
 		return nil, err
 	}
 
+	return parseSpec(content, false)
+}
+
+func isURL(s string) bool {
+	return strings.HasPrefix(s, "http://") || strings.HasPrefix(s, "https://")
+}
+
+func loadFromURL(url string) (*OpenAPI, error) {
+	client := &http.Client{Timeout: 60 * time.Second}
+	resp, err := client.Get(url)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch %s: %v", url, err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("failed to fetch %s: HTTP %d %s", url, resp.StatusCode, resp.Status)
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response from %s: %v", url, err)
+	}
+
+	// Auto-detect encoding
+	if !utf8.Valid(body) {
+		// Try UTF-8-BOM
+		if len(body) >= 3 && body[0] == 0xEF && body[1] == 0xBB && body[2] == 0xBF {
+			return parseSpec(string(body[3:]), true)
+		}
+		// Try UTF-16
+		for _, bom := range [][]byte{{0xFF, 0xFE}, {0xFE, 0xFF}} {
+			if len(body) >= len(bom) && equalBytes(body[:len(bom)], bom) {
+				return parseSpec(string(body[len(bom):]), true)
+			}
+		}
+		return nil, fmt.Errorf("response from %s is not UTF-8 encoded", url)
+	}
+
+	return parseSpec(string(body), true)
+}
+
+func parseSpec(content string, fromRemote bool) (*OpenAPI, error) {
 	var raw map[string]any
 	if err := json.Unmarshal([]byte(content), &raw); err != nil {
 		return nil, fmt.Errorf("JSON parse error: %v\n(Is this a valid JSON file?)", err)
 	}
 
-	// Validate basic OpenAPI structure
 	openapiVer, hasV3 := raw["openapi"].(string)
 	swaggerVer, hasV2 := raw["swagger"].(string)
 	if !hasV3 && !hasV2 {
